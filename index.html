@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jorge F. González Higueras, PhD — Computational Biophysicist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --night: #0a0f1a; --surface: #141e30; --panel: #1a2640;
+      --border: rgba(255,255,255,0.07); --amber: #e8a838;
+      --amber-dim: rgba(232,168,56,0.15); --amber-glow: rgba(232,168,56,0.06);
+      --teal: #4ecdc4; --teal-dim: rgba(78,205,196,0.12);
+      --green: #6bcb77; --green-dim: rgba(107,203,119,0.12);
+      --text: #e8e4dc; --muted: #8a9ab5; --faint: #4a5568;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--night); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.7; overflow-x: hidden; }
+    #network-canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; opacity:0.3; pointer-events:none; }
+    nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; justify-content:space-between; align-items:center; padding:1.1rem 3rem; background:rgba(10,15,26,0.88); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+    .nav-logo { font-family:var(--serif); font-size:1.05rem; color:var(--amber); text-decoration:none; }
+    .nav-links { display:flex; gap:2rem; list-style:none; }
+    .nav-links a { font-family:var(--mono); font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+    .nav-links a:hover { color:var(--amber); }
+    main { position:relative; z-index:1; }
+    .wrap { max-width:980px; margin:0 auto; padding:0 2.5rem; }
+    section { padding:5.5rem 0; }
+    #hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:0 3.5rem; max-width:none; }
+    .hero-tag { font-family:var(--mono); font-size:0.68rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--amber); margin-bottom:1.4rem; opacity:0; animation:fadeUp 0.8s ease 0.2s forwards; }
+    h1 { font-family:var(--serif); font-size:clamp(2.8rem,6.5vw,5.5rem); font-weight:300; line-height:1.05; color:var(--text); margin-bottom:1.4rem; opacity:0; animation:fadeUp 0.8s ease 0.4s forwards; }
+    h1 em { font-style:italic; color:var(--amber); }
+    .hero-sub { font-size:1rem; font-weight:300; color:var(--muted); max-width:540px; line-height:1.85; margin-bottom:2.2rem; opacity:0; animation:fadeUp 0.8s ease 0.6s forwards; }
+    .hero-meta { display:flex; flex-wrap:wrap; gap:0.7rem; margin-bottom:2.5rem; opacity:0; animation:fadeUp 0.8s ease 0.7s forwards; }
+    .meta-pill { font-family:var(--mono); font-size:0.68rem; letter-spacing:0.07em; padding:0.35rem 0.9rem; border:1px solid var(--border); border-radius:2px; color:var(--muted); background:var(--panel); }
+    .meta-pill.hi { border-color:var(--amber); color:var(--amber); background:var(--amber-glow); }
+    .meta-pill.teal { border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+    .hero-cta { display:flex; gap:0.8rem; flex-wrap:wrap; opacity:0; animation:fadeUp 0.8s ease 0.9s forwards; }
+    .btn { font-family:var(--mono); font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.7rem 1.6rem; text-decoration:none; border-radius:2px; transition:all 0.2s; }
+    .btn-primary { background:var(--amber); color:var(--night); font-weight:500; }
+    .btn-primary:hover { background:#f0b84a; transform:translateY(-1px); }
+    .btn-outline { border:1px solid var(--border); color:var(--muted); }
+    .btn-outline:hover { border-color:var(--amber); color:var(--amber); }
+    .section-label { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--amber); margin-bottom:0.6rem; }
+    h2 { font-family:var(--serif); font-size:clamp(1.8rem,3.5vw,2.8rem); font-weight:300; line-height:1.1; color:var(--text); margin-bottom:2.5rem; }
+    h2 em { font-style:italic; color:var(--amber); }
+    .divider { width:100%; height:1px; background:var(--border); }
+    .research-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:1.5px; background:var(--border); border:1px solid var(--border); }
+    .research-card { background:var(--surface); transition:background 0.2s; overflow:hidden; }
+    .research-card:hover { background:var(--panel); }
+    .research-card-body { padding:2.2rem; }
+    .card-media { position:relative; width:100%; aspect-ratio:16/10; background:var(--night); overflow:hidden; }
+    .card-media img, .card-media video { width:100%; height:100%; object-fit:cover; display:block; }
+    .card-media::after { content:''; position:absolute; inset:0; box-shadow:inset 0 -1.5rem 1.5rem -1.5rem rgba(10,15,26,0.6); pointer-events:none; }
+    .card-media-tag { position:absolute; top:0.7rem; right:0.7rem; font-family:var(--mono); font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase; padding:0.2rem 0.5rem; border-radius:2px; background:rgba(10,15,26,0.72); color:var(--amber); border:1px solid var(--amber-dim); backdrop-filter:blur(4px); z-index:1; }
+    .card-icon { font-size:1.5rem; margin-bottom:1rem; display:block; }
+    .card-title { font-family:var(--serif); font-size:1.15rem; color:var(--text); margin-bottom:0.6rem; line-height:1.3; }
+    .card-body { font-size:0.85rem; color:var(--muted); line-height:1.75; }
+    .card-tags { margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.35rem; }
+    .tag { font-family:var(--mono); font-size:0.6rem; letter-spacing:0.06em; padding:0.18rem 0.55rem; border:1px solid var(--faint); color:var(--faint); border-radius:2px; }
+    .pub-item { display:grid; grid-template-columns:3.5rem 1fr; gap:0 1.5rem; padding:1.8rem 0; border-bottom:1px solid var(--border); }
+    .pub-item:first-child { border-top:1px solid var(--border); }
+    .pub-num { font-family:var(--mono); font-size:0.68rem; color:var(--faint); padding-top:0.2rem; text-align:right; }
+    .pub-title { font-family:var(--serif); font-size:1.05rem; color:var(--text); line-height:1.4; margin-bottom:0.35rem; }
+    .pub-authors { font-size:0.8rem; color:var(--muted); margin-bottom:0.25rem; }
+    .pub-authors strong { color:var(--amber); font-weight:500; }
+    .pub-journal { font-family:var(--mono); font-size:0.68rem; color:var(--teal); }
+    .pub-badge { display:inline-block; margin-left:0.7rem; font-size:0.6rem; padding:0.1rem 0.45rem; background:var(--teal-dim); color:var(--teal); border-radius:2px; }
+    .news-item { display:grid; grid-template-columns:8rem 1fr; gap:0 2rem; padding:1.4rem 0; border-bottom:1px solid var(--border); align-items:start; }
+    .news-item:first-child { border-top:1px solid var(--border); }
+    .news-date { font-family:var(--mono); font-size:0.68rem; color:var(--faint); padding-top:0.1rem; }
+    .news-text { font-size:0.88rem; color:var(--muted); line-height:1.65; }
+    .news-text strong { color:var(--text); font-weight:500; }
+    .news-accent { color:var(--amber); font-weight:500; }
+    .news-teal { color:var(--teal); }
+    .skills-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:2rem; }
+    .skill-group-label { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); margin-bottom:0.9rem; padding-bottom:0.4rem; border-bottom:1px solid var(--amber-dim); }
+    .skill-list { list-style:none; display:flex; flex-direction:column; gap:0.4rem; }
+    .skill-list li { font-size:0.83rem; color:var(--muted); padding-left:1rem; position:relative; }
+    .skill-list li::before { content:'--'; position:absolute; left:0; color:var(--faint); font-size:0.68rem; }
+    .skill-list li strong { color:var(--text); font-weight:500; }
+    .record-block { margin-bottom:3rem; }
+    .record-block-title { font-family:var(--mono); font-size:0.68rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--teal); margin-bottom:1.2rem; padding-bottom:0.5rem; border-bottom:1px solid var(--teal-dim); }
+    .record-item { display:grid; grid-template-columns:9rem 1fr; gap:0 1.8rem; padding:1rem 0; border-bottom:1px solid var(--border); }
+    .record-item:last-child { border-bottom:none; }
+    .record-year { font-family:var(--mono); font-size:0.68rem; color:var(--faint); padding-top:0.15rem; }
+    .record-content { font-size:0.85rem; color:var(--muted); line-height:1.65; }
+    .record-content strong { color:var(--text); font-weight:500; display:block; margin-bottom:0.15rem; }
+    .record-content em { color:var(--amber); font-style:normal; font-size:0.78rem; font-family:var(--mono); }
+    .record-link { display:inline-block; margin-top:0.3rem; font-family:var(--mono); font-size:0.62rem; color:var(--teal); letter-spacing:0.05em; text-decoration:none; border-bottom:1px solid var(--teal-dim); }
+    .record-link:hover { color:var(--amber); }
+    .badge { display:inline-block; font-family:var(--mono); font-size:0.58rem; padding:0.1rem 0.45rem; border-radius:2px; margin-left:0.4rem; vertical-align:middle; }
+    .badge-amber { background:var(--amber-dim); color:var(--amber); }
+    .badge-teal { background:var(--teal-dim); color:var(--teal); }
+    .badge-green { background:var(--green-dim); color:var(--green); }
+    #contact { text-align:center; }
+    .contact-links { display:flex; justify-content:center; flex-wrap:wrap; gap:0.8rem; margin-top:2rem; }
+    .contact-link { font-family:var(--mono); font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-decoration:none; padding:0.6rem 1.3rem; border:1px solid var(--border); border-radius:2px; transition:all 0.2s; }
+    .contact-link:hover { border-color:var(--amber); color:var(--amber); }
+    footer { position:relative; z-index:1; text-align:center; padding:2rem; border-top:1px solid var(--border); font-family:var(--mono); font-size:0.65rem; color:var(--faint); letter-spacing:0.06em; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .reveal { opacity:0; transform:translateY(22px); transition:opacity 0.65s ease, transform 0.65s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    @media (max-width:768px) { nav { padding:1rem 1.5rem; } .nav-links { display:none; } #hero { padding:0 1.5rem; } .wrap { padding:0 1.5rem; } .pub-item { grid-template-columns:2.5rem 1fr; } .news-item, .record-item { grid-template-columns:1fr; gap:0.3rem; } }
+  </style>
+</head>
+<body>
+<canvas id="network-canvas"></canvas>
+<nav>
+  <a href="#hero" class="nav-logo">J. González Higueras</a>
+  <ul class="nav-links">
+    <li><a href="#research">Research</a></li>
+    <li><a href="#publications">Publications</a></li>
+    <li><a href="#updates">News</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#record">Full Record</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+<main>
+
+<section id="hero">
+  <p class="hero-tag">Computational Biophysics · Protein Energy Landscapes · Evolutionary Biophysics · Molecular Simulation</p>
+  <h1>Jorge F.<br><em>González Higueras</em>, PhD</h1>
+  <p class="hero-sub">PhD in Biological and Medical Engineering, Pontificia Universidad Católica de Chile (2026). I study how proteins encode large-scale structural transitions through energetic frustration — at the intersection of coarse-grained simulation, evolutionary biophysics, and AI-driven protein design.</p>
+  <div class="hero-meta">
+    <span class="meta-pill hi">PhD, ANID Fellow (2021–2026)</span>
+    <span class="meta-pill hi">Protein Society DEI Award 2025</span>
+    <span class="meta-pill teal">EMBO Exchange Grant</span>
+    <span class="meta-pill">PUC · Santiago, Chile</span>
+    <span class="meta-pill">BSC Intern · Barcelona 2025</span>
+    <span class="meta-pill">Rosetta Commons Member</span>
+  </div>
+  <div class="hero-cta">
+    <a href="#publications" class="btn btn-primary">Publications</a>
+    <a href="#research" class="btn btn-outline">Research</a>
+    <a href="#record" class="btn btn-outline">Full Record</a>
+    <a href="mailto:jorge.gonzalezh@usm.cl" class="btn btn-outline">Contact</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="research"><div class="wrap">
+  <p class="section-label reveal">Research</p>
+  <h2 class="reveal">Where energy meets <em>evolution</em></h2>
+  <!--
+    IMAGE / VIDEO SLOTS — how to activate them:
+    Create these files in your GitHub repo, in the same folder as this index.html:
+      assets/img/frustration-map.jpg        (image, e.g. frustration index mapped onto RfaH CTD structure)
+      assets/img/frustration-map-poster.jpg (optional: leave out, only needed if you swap this slot for video)
+      assets/video/fold-switch-ensemble.mp4 (short looping clip, e.g. BioEmu/Multi-eGO conformational ensemble)
+      assets/img/fold-switch-poster.jpg     (poster frame shown before the video loads/if it fails)
+      assets/img/coevolution-network.jpg    (image, e.g. coevolution/statistical-coupling network figure)
+      assets/video/binder-design.mp4        (short looping clip, e.g. RFDiffusion/ProteinMPNN binder design trajectory)
+      assets/img/binder-design-poster.jpg   (poster frame for the binder-design video)
+    Until a file exists at a given path, that slot just shows blank/broken — nothing else breaks.
+    Recommended video specs: MP4 (H.264), muted, under ~8s loop, under 5MB so the page stays fast.
+  -->
+  <div class="research-grid reveal">
+    <div class="research-card">
+      <div class="card-media"><img src="assets/img/frustration-map.jpg" alt="Local energetic frustration mapped onto the RfaH CTD structure" loading="lazy"></div>
+      <div class="research-card-body"><span class="card-icon">⚡</span><div class="card-title">Energetic Frustration Dynamics</div><p class="card-body">Contact-based residue-level frustration analysis to decode how metamorphic proteins encode fold-switching. Primary system: RfaH from E. coli.</p><div class="card-tags"><span class="tag">FrustratometeR</span><span class="tag">Frustratometer</span><span class="tag">FrustraEvo</span><span class="tag">Potts models</span></div></div>
+    </div>
+    <div class="research-card">
+      <div class="card-media"><span class="card-media-tag">Simulation</span><video autoplay muted loop playsinline poster="assets/img/fold-switch-poster.jpg"><source src="assets/video/fold-switch-ensemble.mp4" type="video/mp4"></video></div>
+      <div class="research-card-body"><span class="card-icon">🔀</span><div class="card-title">Metamorphic & Disordered Proteins</div><p class="card-body">Conformational ensemble generation in proteins with heterogeneous landscapes — from dual-basin fold-switchers to IDPs. Collaboration with the Camiloni group (MultiEGO, Univ. Milan).</p><div class="card-tags"><span class="tag">OpenSMOG</span><span class="tag">OpenAWSEM</span><span class="tag">MultiEGO</span><span class="tag">GROMACS</span></div></div>
+    </div>
+    <div class="research-card">
+      <div class="card-media"><img src="assets/img/coevolution-network.jpg" alt="Coevolutionary coupling network across a protein family" loading="lazy"></div>
+      <div class="research-card-body"><span class="card-icon">🧬</span><div class="card-title">Evolutionary Biophysics</div><p class="card-body">Connecting frustration patterns to coevolutionary signals across protein families. How do functional sites emerge as frustrated regions? Phylogenetic and statistical coupling analysis at BSC.</p><div class="card-tags"><span class="tag">Coevolution</span><span class="tag">Phylogenetics</span><span class="tag">BSC 2025</span></div></div>
+    </div>
+    <div class="research-card">
+      <div class="card-media"><span class="card-media-tag">Simulation</span><video autoplay muted loop playsinline poster="assets/img/binder-design-poster.jpg"><source src="assets/video/binder-design.mp4" type="video/mp4"></video></div>
+      <div class="research-card-body"><span class="card-icon">🤖</span><div class="card-title">AI-Driven Protein Design</div><p class="card-body">Generative deep learning for protein binder design, structure prediction, and functional annotation. 2nd place at AI4PD hackathon for AI-driven binder design against RfaH.</p><div class="card-tags"><span class="tag">RFDiffusion</span><span class="tag">AlphaFold2/3</span><span class="tag">ProteinMPNN</span></div></div>
+    </div>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<section id="publications"><div class="wrap">
+  <p class="section-label reveal">Publications</p>
+  <h2 class="reveal">Peer-reviewed <em>work</em></h2>
+  <div class="reveal">
+    <div class="pub-item"><div class="pub-num">2024</div><div><div class="pub-title">A contact-based analysis of local energetic frustration dynamics identifies key residues enabling RfaH fold-switch</div><div class="pub-authors"><strong>González-Higueras J.</strong>, Freiberger M.I., Galaz-Davison P., Parra R.G., Ramírez-Sarmiento C.A.</div><div class="pub-journal">Protein Science 33(10): e5182<span class="pub-badge">co-first author</span></div></div></div>
+    <div class="pub-item"><div class="pub-num">2024</div><div><div class="pub-title">Concerted transformation of a hyper-paused transcription complex and its reinforcing protein</div><div class="pub-authors">Zuber P.K., Said N., Hilal T., Wang B., Loll B., <strong>González-Higueras J.</strong>, Ramírez-Sarmiento C.A., et al.</div><div class="pub-journal">Nature Communications 15(1): 3040<span class="pub-badge">Nature Comms</span></div></div></div>
+    <div class="pub-item"><div class="pub-num">2023</div><div><div class="pub-title">Exploring the structural acrobatics of fold-switching proteins using simplified structure-based models</div><div class="pub-authors">Retamal-Farfán I., <strong>González-Higueras J.</strong>, Galaz-Davison P., Rivera M., Ramírez-Sarmiento C.A.</div><div class="pub-journal">Biophysical Reviews 15(4): 787–799</div></div></div>
+    <div class="pub-item"><div class="pub-num">2023</div><div><div class="pub-title">DNA facilitates heterodimerization between human transcription factors FoxP1 and FoxP2 by increasing their conformational flexibility</div><div class="pub-authors">Coñuecar R., Asela I., Rivera M., Galaz-Davison P., <strong>González-Higueras J.</strong>, Hamilton G.L., et al.</div><div class="pub-journal">iScience 26(7): 107228</div></div></div>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<section id="updates"><div class="wrap">
+  <p class="section-label reveal">News & Updates</p>
+  <h2 class="reveal">Recent <em>highlights</em></h2>
+  <div class="reveal">
+    <div class="news-item"><div class="news-date">Aug 2026</div><div class="news-text"><strong>PhD successfully defended.</strong> Thesis: "The Connection Between Dynamic Changes in Local Energy Frustration and Large Rearrangements in Non-Trivially Behaving Proteins." <span class="news-accent">Jorge is now Dr. González Higueras.</span></div></div>
+    <div class="news-item"><div class="news-date">Feb 2026–present</div><div class="news-text"><strong>EMBO Short-Term Fellowship (Exchange Grant)</strong> — Conducting research in the lab of Prof. Carlo Camiloni (University of Milan), building closed-loop workflows connecting BioEmu/Boltz-2 generative outputs with NMR-calibrated MultiEGO potentials. <span class="news-accent">Competitive international EMBO grant.</span></div></div>
+    <div class="news-item"><div class="news-date">Nov 2025</div><div class="news-text"><strong>4th Annual IIBM PhD Symposium</strong>, PUC — Oral presentation: "Elucidating Mad2's Fold-Switching Mechanism: Bridging SBM and Conformational Dynamics Characterization Using NMR Experimental Cues."</div></div>
+    <div class="news-item"><div class="news-date">Oct–Nov 2025</div><div class="news-text"><strong>EMBO PhD Course</strong>: Empower Your Research Journey — two-week intensive programme, European Molecular Biology Organization.</div></div>
+    <div class="news-item"><div class="news-date">Jun 2025</div><div class="news-text"><strong>39th Protein Society Annual Symposium</strong>, San Francisco. <span class="news-accent">Recipient: 2025 Diversity, Equity and Inclusion Travel Award.</span></div></div>
+    <div class="news-item"><div class="news-date">May 2025</div><div class="news-text"><strong>Invited talk</strong> at the 12th BSC Severo Ochoa Doctoral Symposium, Barcelona — "To Switch or Not to Switch? Unknotting Mad2's Folding Mystery."</div></div>
+    <div class="news-item"><div class="news-date">Feb–May 2025</div><div class="news-text"><strong>Doctoral Internship at BSC Barcelona</strong> with Prof. Alfonso Valencia and Dr. R. Gonzalo Parra. <span class="news-teal">Funded by competitive ANID International Internship grant.</span></div></div>
+    <div class="news-item"><div class="news-date">Oct 2023</div><div class="news-text"><span class="news-accent">2nd place</span> at the AI4PD Workshop Hackathon — AI-driven binder design against the virulence factor RfaH.</div></div>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<section id="skills"><div class="wrap">
+  <p class="section-label reveal">Technical Skills</p>
+  <h2 class="reveal">Tools of the <em>trade</em></h2>
+  <div class="skills-grid reveal">
+    <div><div class="skill-group-label">Simulation</div><ul class="skill-list"><li><strong>GROMACS</strong> — extensive, 7+ yrs</li><li><strong>AMBER</strong> AmberTools / AmberAPI</li><li><strong>OpenMM</strong> · OpenSMOG · OpenAWSEM</li><li>SMOG2 · dual-basin · Go models</li><li>MDAnalysis · MDTraj · Packmol</li><li>Gaussian · ORCA (QM/MM)</li></ul></div>
+    <div><div class="skill-group-label">Frustration & Evolution</div><ul class="skill-list"><li><strong>FrustratometeR</strong> — PhD core tool (R package)</li><li>Frustratometer Python API</li><li>Potts models · coevolution</li><li>FrustraEvo framework (BSC)</li><li><strong>MultiEGO</strong> (Camiloni lab)</li><li>Phylogenetic structural analysis</li></ul></div>
+    <div><div class="skill-group-label">AI & Protein Design</div><ul class="skill-list"><li><strong>AlphaFold2/3</strong> · RosettaFold · ESMFold</li><li><strong>RFDiffusion</strong> · ProteinMPNN · ESM2</li><li>Rosetta suite · C++ development</li><li>PyTorch · scikit-learn</li><li>Graph neural networks</li></ul></div>
+    <div><div class="skill-group-label">Programming & HPC</div><ul class="skill-list"><li><strong>Python</strong> — advanced (NumPy, Pandas, PyTorch, SciPy)</li><li><strong>R</strong> — proficient</li><li><strong>C++</strong> — working knowledge</li><li>Bash · Linux · GPU optimization</li><li>HPC clusters · SSH · compilation</li><li>Napari · Jupyter</li></ul></div>
+    <div><div class="skill-group-label">Languages</div><ul class="skill-list"><li><strong>Spanish</strong> — native</li><li><strong>English</strong> — professional / upper-intermediate (TOEIC certified)</li></ul></div>
+  </div>
+</div></section>
+
+<div class="divider"></div>
+
+<section id="record"><div class="wrap">
+  <p class="section-label reveal">Full Academic Record</p>
+  <h2 class="reveal">Complete <em>trajectory</em></h2>
+  <p class="reveal" style="color:var(--muted);font-size:0.88rem;margin-bottom:3rem;max-width:600px;">A comprehensive registry of all academic activities, certifications, training, grants, and recognition — the full scientific journey, nothing discarded.</p>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Education</div>
+    <div class="record-item"><div class="record-year">2026</div><div class="record-content"><strong>Ph.D. in Biological and Medical Engineering</strong>Pontificia Universidad Católica de Chile (PUC), Santiago. Thesis: "The Connection Between Dynamic Changes in Local Energy Frustration and Large Rearrangements in Non-Trivially Behaving Proteins." Funded by ANID. <em>Doctoral title conferred.</em></div></div>
+    <div class="record-item"><div class="record-year">2020</div><div class="record-content"><strong>M.Sc. in Chemistry — Computational Chemistry</strong>Universidad Técnica Federico Santa María (UTFSM), Valparaíso. Thesis: "Structural Insights into HDAC1 Inhibition by Benzamide Derivatives" — combined molecular docking, molecular dynamics, and 3D-QSAR study.</div></div>
+    <div class="record-item"><div class="record-year">2014–2015</div><div class="record-content"><strong>Undergraduate Thesis, Chemist degree</strong>UTFSM, Valparaíso. "Computational Study of the Role of Flanking Base Pairs and the First Hydration Shell in the Conformational Preference of RNA Internal Loops Containing GU Mismatches."</div></div>
+    <div class="record-item"><div class="record-year">2009–2013</div><div class="record-content"><strong>B.Sc. in Chemistry — Physical Chemistry</strong>Department of Chemistry, UTFSM, Valparaíso.</div></div>
+    <div class="record-item"><div class="record-year">2004–2008</div><div class="record-content"><strong>B.Sc. in Chemical Engineering</strong>Department of Chemical Engineering, UTFSM, Valparaíso.</div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Grants & Competitive Funding</div>
+    <div class="record-item"><div class="record-year">2026–present</div><div class="record-content"><strong>EMBO Short-Term Fellowship (Exchange Grant) <span class="badge badge-amber">EMBO</span></strong>Scientific exchange at the laboratory of Prof. Carlo Camiloni, University of Milan, Italy. Connecting BioEmu/Boltz-2 generative outputs with NMR-calibrated MultiEGO potentials for structure-based models. <em>Highly competitive international grant; ongoing, results in preparation.</em></div></div>
+    <div class="record-item"><div class="record-year">2025</div><div class="record-content"><strong>ANID International Internship Grant <span class="badge badge-teal">ANID</span></strong>Competitive complementary benefits grant to fund doctoral internship at the Barcelona Supercomputing Center (BSC).</div></div>
+    <div class="record-item"><div class="record-year">2021–present</div><div class="record-content"><strong>ANID Doctoral National Fellowship <span class="badge badge-teal">ANID</span></strong>Full doctoral fellowship, National Agency for Research and Development of Chile. Competitive national award.</div></div>
+    <div class="record-item"><div class="record-year">2024–present</div><div class="record-content"><strong>FONDECYT Regular 1240205</strong>Coevolution and frustration as molecular drivers encoding fold-switching behaviors in natural and de novo designed metamorphic proteins. PUC.</div></div>
+    <div class="record-item"><div class="record-year">2021–2024</div><div class="record-content"><strong>FONDECYT Regular 120168</strong>Unveiling the evolutionary information for specifying a functional fold-switch in proteins. PUC.</div></div>
+    <div class="record-item"><div class="record-year">2017–2018</div><div class="record-content"><strong>FONDECYT 11150988</strong>Development of new Hsp90 inhibitor molecules: computational design, synthesis and biological evaluation. UTFSM.</div></div>
+    <div class="record-item"><div class="record-year">2015–2016</div><div class="record-content"><strong>CILIS — Interdisciplinary Center of Ionic Liquids</strong>Millennium Scientific Initiative, Ministry of Economy, Chile (Minecon). Project 1: Ionic Liquids as Electrolytes for Enhanced Energy Storage. Project 2: Task-Specific Ionic Liquid in Nitro Aldol Reaction — Experimental, QM/MM and MD Analysis.</div></div>
+    <div class="record-item"><div class="record-year">2015–2016</div><div class="record-content"><strong>CORFO English Scholarship</strong>Competitive national scholarship for English language training, North American Chilean OTEC Institution, Valparaíso.</div></div>
+    <div class="record-item"><div class="record-year">2012</div><div class="record-content"><strong>FONDECYT 11100062</strong>Theoretical prediction of the effects of flanking pairs on RNA internal loop structure and dynamics. UTFSM.</div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Awards & Recognition</div>
+    <div class="record-item"><div class="record-year">2025</div><div class="record-content"><strong>Diversity, Equity and Inclusion Travel Award <span class="badge badge-amber">Protein Society</span></strong>39th Protein Society Annual Symposium, San Francisco, USA.</div></div>
+    <div class="record-item"><div class="record-year">2023</div><div class="record-content"><strong>2nd Place — AI4PD Workshop Hackathon <span class="badge badge-green">competition</span></strong>Latin American Workshop on AI for Protein Design, Puerto Varas, Chile. AI-driven binder design against RfaH.</div></div>
+    <div class="record-item"><div class="record-year">2023</div><div class="record-content"><strong>UC Doctoral Graduate School Travel Grant</strong>Awarded to attend the 37th Protein Society Annual Symposium, Boston, USA.</div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Advanced Training & Workshops</div>
+    <div class="record-item"><div class="record-year">Jan 2026</div><div class="record-content"><strong>Non-Equilibrium Statistical Physics</strong>Graduate course by Prof. Christopher Jarzynski (University of Maryland), hosted by the Faculty of Chemical and Pharmaceutical Sciences, Universidad de Chile. Stochastic systems, nanoscale fluctuations, linear response theory, and fluctuation theorems (Jarzynski Equality). Santiago, Chile.</div></div>
+    <div class="record-item"><div class="record-year">Jan–Feb 2026</div><div class="record-content"><strong>Research Integrity — Epigeum / Oxford University Press <span class="badge badge-teal">certification</span></strong>International standards in research ethics and integrity. Completed prior to EMBO scientific exchange at the Camiloni lab.</div></div>
+    <div class="record-item"><div class="record-year">Oct–Nov 2025</div><div class="record-content"><strong>EMBO PhD Course: Empower Your Research Journey <span class="badge badge-amber">EMBO</span></strong>Two-week intensive programme by the European Molecular Biology Organization. <a href="#" class="record-link">Certificate ↗</a></div></div>
+    <div class="record-item"><div class="record-year">Aug 2024</div><div class="record-content"><strong>Workshop: Predicting and Designing Proteins of the Future Using Rosetta and AI</strong>PB3Lab, UC Vice-Rectorate, University of Leipzig, and Meiler Lab. Santiago, Chile. Role: computational setup and software support.</div></div>
+    <div class="record-item"><div class="record-year">Mar 2024</div><div class="record-content"><strong>Winter RosettaCon Bootcamp</strong>Boston, USA. Protein modeling and design; Rosetta tools and machine learning.</div></div>
+    <div class="record-item"><div class="record-year">Jan–Feb 2024</div><div class="record-content"><strong>Rosetta C++ Bootcamp</strong>Nashville, USA. C++ development for contributions to the RosettaCommons codebase.</div></div>
+    <div class="record-item"><div class="record-year">Jan 2024</div><div class="record-content"><strong>MIRO Quantum Computing School</strong>Millennium Institute of Research in Optics. Quantum computing applications in biomolecular research.</div></div>
+    <div class="record-item"><div class="record-year">Nov 2022</div><div class="record-content"><strong>Co-organizer — Symposium "Chaos, Panic, and Dis(order) in Protein Evolution"</strong>International speakers. UC Doctoral Seminars and Graduate School, Santiago, Chile.</div></div>
+    <div class="record-item"><div class="record-year">Aug 2022</div><div class="record-content"><strong>Workshop: Structural Biology — Present and Future</strong>Santiago, Chile. Crystallography, cryo-EM, and molecular modeling. <a href="#" class="record-link">Certificate ↗</a></div></div>
+    <div class="record-item"><div class="record-year">2021</div><div class="record-content"><strong>Fundamentals of Enzymatic Catalysis Using Computational Methods <span class="badge badge-green">Grade: 7.0/7.0</span></strong>University of Talca. PhD Program in Sciences — Modeling of Chemical and Biological Systems. MD, quantum chemistry, hybrid QM/MM. <a href="#" class="record-link">Certificate ↗</a></div></div>
+    <div class="record-item"><div class="record-year">May 2021</div><div class="record-content"><strong>Computational Biochemistry: Efficient Tools to Fight Diseases</strong>ZCAM Zaragoza Scientific Center for Advanced Modeling, Spain. <a href="#" class="record-link">Certificate ↗</a></div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">MOOC Certifications</div>
+    <div class="record-item"><div class="record-year">2022</div><div class="record-content"><strong>Industrial Biotechnology</strong><em>University of Manchester</em></div></div>
+    <div class="record-item"><div class="record-year">2019</div><div class="record-content"><strong>Python Functions, Files, and Dictionaries</strong><em>University of Michigan, School of Information</em></div></div>
+    <div class="record-item"><div class="record-year">2019</div><div class="record-content"><strong>Python Basics</strong><em>University of Michigan, School of Information</em></div></div>
+    <div class="record-item"><div class="record-year">2014</div><div class="record-content"><strong>Programming for Everybody (Python)</strong><em>University of Michigan, School of Information</em></div></div>
+    <div class="record-item"><div class="record-year">2014</div><div class="record-content"><strong>Introduction to Physical Chemistry</strong><em>University of Manchester, School of Chemistry</em></div></div>
+    <div class="record-item"><div class="record-year">2014</div><div class="record-content"><strong>Statistical Molecular Thermodynamics</strong><em>University of Minnesota, Department of Chemistry</em></div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Conferences & Presentations (Complete)</div>
+    <div class="record-item"><div class="record-year">Nov 2025</div><div class="record-content"><strong>4th Annual IIBM PhD Symposium — Advances in Biological and Medical Engineering, PUC <span class="badge badge-teal">oral</span></strong>"Elucidating Mad2's Fold-Switching Mechanism: Bridging SBM and Conformational Dynamics Characterization Using NMR Experimental Cues."</div></div>
+    <div class="record-item"><div class="record-year">Jun 2025</div><div class="record-content"><strong>39th Protein Society Annual Symposium — San Francisco, USA <span class="badge badge-amber">DEI Award</span></strong>Poster: "A contact-based analysis of local energetic frustration dynamics identifies key residues enabling RfaH fold-switch."</div></div>
+    <div class="record-item"><div class="record-year">May 2025</div><div class="record-content"><strong>12th BSC Severo Ochoa Doctoral Symposium — Barcelona, Spain <span class="badge badge-teal">invited talk</span></strong>"To Switch or Not to Switch? Unknotting Mad2's Folding Mystery."</div></div>
+    <div class="record-item"><div class="record-year">Oct 2023</div><div class="record-content"><strong>AI4PD: Latin American Workshop on AI for Protein Design — Puerto Varas, Chile <span class="badge badge-green">2nd place hackathon</span></strong>Poster: "Design of binders for impeding the action of the virulence factor RfaH using AI."</div></div>
+    <div class="record-item"><div class="record-year">Jul 2023</div><div class="record-content"><strong>37th Protein Society Annual Symposium — Boston, USA <span class="badge badge-teal">travel grant</span></strong>Flash talk and poster: "Elucidating the all-alpha to all-beta refolding of RfaH bound to transcription elongation complexes using dual-basin structure-based models."</div></div>
+    <div class="record-item"><div class="record-year">2019</div><div class="record-content"><strong>III International Symposium on Integrative Bioinformatics (SIBI) — Pucón, Chile</strong>Poster and oral: "Combined CoMFA, CoMSIA, Molecular Docking and Dynamics Studies of HDAC I/II Inhibitors."</div></div>
+    <div class="record-item"><div class="record-year">2017</div><div class="record-content"><strong>ICBSM-02 — Talca, Chile</strong>"Structural Insight on Hsp90-Binding Modes of Naphthoquinone Derivatives." <a href="https://sciforum.net/paper/view/6099" class="record-link" target="_blank">View ↗</a></div></div>
+    <div class="record-item"><div class="record-year">2015</div><div class="record-content"><strong>VII Nanostructure School — Valparaíso, Chile</strong>Poster: "RNA Duplex Study Using Molecular Dynamics Simulations."</div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Teaching & Academic Service</div>
+    <div class="record-item"><div class="record-year">Aug–Dec 2023</div><div class="record-content"><strong>Teaching Assistant — Molecular Modeling and Simulation (graduate), PUC</strong>Students from Engineering, Chemistry and Biological Sciences.</div></div>
+    <div class="record-item"><div class="record-year">2024</div><div class="record-content"><strong>Teaching Assistant — PhD Summer Boot Camp (math and programming), PUC</strong>Incoming PhD students in Biomedical Engineering.</div></div>
+    <div class="record-item"><div class="record-year">Ongoing</div><div class="record-content"><strong>Teaching Assistant — Introduction to Napari for Bioimage Analysis, PUC</strong>Python-based bioimage analysis; Python, Julia, and scientific libraries.</div></div>
+    <div class="record-item"><div class="record-year">2015–2024</div><div class="record-content"><strong>Catedra and Laboratory Instructor — Chemistry and Society, UTFSM</strong>9 years continuous. Undergraduate level.</div></div>
+    <div class="record-item"><div class="record-year">2011–2014</div><div class="record-content"><strong>Teaching Assistant — Physical Chemistry III: Statistical Molecular Thermodynamics, UTFSM</strong></div></div>
+    <div class="record-item"><div class="record-year">2013–2014</div><div class="record-content"><strong>Mentor — CIAC Integrated Learning Centre, UTFSM</strong>Chemistry and Process, Basic Chemistry, Chemistry and Society.</div></div>
+    <div class="record-item"><div class="record-year">2019–2020</div><div class="record-content"><strong>Consultancy — MD Simulations, GROMACS (FONDECYT 11160768)</strong>Dr. Christopher Cooper, Dept. of Mechanical Engineering, UTFSM. Solvation of large organic molecule datasets.</div></div>
+    <div class="record-item"><div class="record-year">2019</div><div class="record-content"><strong>Relator — Stoichiometry, Industrial Chemistry and Thermodynamics</strong>Merchant Marine, Puerto Montt, OTEC CEPROMAR.</div></div>
+    <div class="record-item"><div class="record-year">2020</div><div class="record-content"><strong>SciFinder Strategy Consultancy</strong>Conceptual analysis for implementation of SciFinder at USM Libraries. Synthetic feasibility study for epigenetic cancer treatment molecules.</div></div>
+    <div class="record-item"><div class="record-year">2015–2016</div><div class="record-content"><strong>CORFO Project 15 COTE 46255</strong>Design and experimental validation of photo-sono-electrochemical cells for hydrogen fuel generation.</div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Entrepreneurship</div>
+    <div class="record-item"><div class="record-year">2020</div><div class="record-content"><strong>Co-founder, Covida SpA</strong>Sanitation services for public and private spaces (hospitals, schools, markets, transit) during the pandemic, supporting the reactivation of local work and economies.</div></div>
+  </div>
+
+  <div class="record-block reveal">
+    <div class="record-block-title">Memberships</div>
+    <div class="record-item"><div class="record-year">Since 2023</div><div class="record-content"><strong>Rosetta Commons</strong>International consortium for macromolecular modeling and protein design.</div></div>
+    <div class="record-item"><div class="record-year">Since 2025</div><div class="record-content"><strong>Protein Society</strong>Member and DEI Award recipient (2025).</div></div>
+  </div>
+
+</div></section>
+
+<div class="divider"></div>
+
+<section id="contact"><div class="wrap">
+  <p class="section-label reveal">Contact</p>
+  <h2 class="reveal">Let's <em>connect</em></h2>
+  <p class="reveal" style="color:var(--muted);max-width:460px;margin:0 auto 1rem;font-size:0.9rem;">Open to postdoctoral collaborations in computational biophysics, protein energy landscapes, and evolutionary structural biology.</p>
+  <div class="contact-links reveal">
+    <a href="mailto:jorge.gonzalezh@usm.cl" class="contact-link">jorge.gonzalezh@usm.cl</a>
+    <a href="mailto:jfgonzalez5@uc.cl" class="contact-link">jfgonzalez5@uc.cl</a>
+    <a href="https://www.linkedin.com/in/jorge-francisco-gonz%C3%A1lez-higueras" class="contact-link" target="_blank">LinkedIn</a>
+    <a href="https://scholar.google.com" class="contact-link" target="_blank">Google Scholar</a>
+    <a href="https://orcid.org/YOUR-ORCID" class="contact-link" target="_blank">ORCID</a>
+  </div>
+</div></section>
+
+</main>
+<footer>© 2026 Jorge F. González Higueras, PhD · Computational Biophysicist · PUC Santiago, Chile<br><span style="opacity:0.5;margin-top:0.3rem;display:block;">Built with HTML · Hosted on GitHub Pages</span></footer>
+
+<script>
+  const canvas = document.getElementById('network-canvas');
+  const ctx = canvas.getContext('2d');
+  let nodes=[], W, H;
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  function initNodes(n=60){ nodes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.22,vy:(Math.random()-0.5)*0.22,r:Math.random()*2+0.8})); }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<130){ctx.beginPath();ctx.strokeStyle=`rgba(232,168,56,${(1-d/130)*0.28})`;ctx.lineWidth=0.5;ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke();}}
+    nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle='rgba(232,168,56,0.45)';ctx.fill();n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;});
+    requestAnimationFrame(draw);
+  }
+  resize(); initNodes(); draw();
+  window.addEventListener('resize',()=>{resize();initNodes();});
+  const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('visible');});},{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
